@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Image to PDF</title>
+  <style>
+    :root { --bg:#0b0f17;--panel:#121826;--text:#e6e9f0;--muted:#a8b0bf;--accent:#3b82f6;--border:#1f2736; }
+    *{box-sizing:border-box;}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;}
+    header{padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:10;}
+    main{max-width:1000px;margin:0 auto;padding:20px;}
+    h1{margin:0 0 8px;font-size:1.4rem;}
+    p.helper{color:var(--muted);margin:0 0 12px;}
+    .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;}
+    .controls{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px;margin-top:12px;}
+    label{display:block;font-size:.9rem;color:var(--muted);margin-bottom:6px;}
+    select,input[type="number"]{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0f1524;color:var(--text);}
+    .dropzone{margin-top:12px;border:2px dashed var(--border);border-radius:14px;padding:20px;text-align:center;color:var(--muted);}
+    .dropzone.drag{border-color:var(--accent);color:var(--text);}
+    .file-actions{display:flex;gap:10px;justify-content:center;margin-top:10px;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:#162035;color:var(--text);cursor:pointer;user-select:none;}
+    .btn.primary{background:var(--accent);border-color:var(--accent);color:white;}
+    .btn.danger{background:#b91c1c;border-color:#b91c1c;color:white;}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;}
+    @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:640px){.grid{grid-template-columns:1fr;}.controls{grid-template-columns:1fr 1fr;}}
+    .thumb{background:#0f1524;border:1px solid var(--border);border-radius:12px;padding:10px;display:grid;grid-template-columns:90px 1fr;gap:10px;}
+    .thumb img{width:90px;height:90px;object-fit:cover;border-radius:8px;}
+    .thumb .meta{font-size:.85rem;color:var(--muted);}
+    .thumb .row{display:flex;gap:8px;align-items:center;margin-top:8px;}
+    .thumb .handle{cursor:grab;padding:6px 8px;border-radius:8px;border:1px dashed var(--border);background:#0e1220;color:var(--muted);}
+    .thumb.dragging{opacity:.6;}
+    .footer{margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+    .progress{height:8px;border-radius:8px;background:#0f1524;border:1px solid var(--border);overflow:hidden;flex:1;min-width:200px;}
+    .progress>span{display:block;height:100%;width:0%;background:var(--accent);transition:width .2s ease;}
+    .hint{color:var(--muted);font-size:.85rem;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Image to PDF</h1>
+    <p class="helper">Add images, arrange order, choose page options, and download a PDF — all in your browser.</p>
+  </header>
+
+  <main>
+    <section class="panel">
+
+      <!-- Controls restored -->
+      <div class="controls">
+        <div>
+          <label>Page size</label>
+          <select id="pageSize">
+            <option value="A4">A4</option>
+            <option value="Letter">Letter</option>
+            <option value="Legal">Legal</option>
+            <option value="A3">A3</option>
+          </select>
+        </div>
+        <div>
+          <label>Orientation</label>
+          <select id="orientation">
+            <option value="landscape">Landscape</option>
+            <option value="portrait">Portrait</option>
+          </select>
+        </div>
+        <div>
+          <label>Margin (mm)</label>
+          <input id="marginMm" type="number" value="0" min="0" step="1"/>
+        </div>
+        <div>
+          <label>One image per page</label>
+          <input id="onePerPage" type="checkbox" checked/>
+        </div>
+      </div>
+
+      <div class="dropzone" id="dropzone">
+        <p>Drag & drop images here, or</p>
+        <div class="file-actions">
+          <label class="btn">
+            <input id="fileInput" type="file" accept="image/*" multiple style="display:none"/>
+            Select images
+          </label>
+          <button class="btn danger" id="clearBtn" type="button">Clear all</button>
+        </div>
+        <p class="hint">Supported: JPG, PNG, GIF, WEBP, BMP. Large images are handled client‑side.</p>
+      </div>
+
+      <div class="grid" id="thumbGrid" aria-live="polite"></div>
+
+      <div class="footer">
+        <div class="progress"><span id="progressBar"></span></div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="btn primary" id="makePdfBtn" type="button">Create PDF</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
+  <script>
+    const state = { files: [] };
+    const dz = document.getElementById('dropzone');
+    const input = document.getElementById('fileInput');
+    const grid = document.getElementById('thumbGrid');
+    const clearBtn = document.getElementById('clearBtn');
+    const makeBtn = document.getElementById('makePdfBtn');
+    const progressBar = document.getElementById('progressBar');
+
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); addFiles(e.dataTransfer.files); });
+    input.addEventListener('change', e => addFiles(e.target.files));
+    clearBtn.addEventListener('click', () => { state.files = []; render(); });
+
+    function addFiles(fileList) {
+      const list = Array.from(fileList || []).filter(f => f.type.startsWith('image/'));
+      list.forEach(f => state.files.push({ file: f, name: f.name, url: URL.createObjectURL(f) }));
+      render();
+    }
+
+    function render() {
+      grid.innerHTML = '';
+      state.files.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'thumb'; card.draggable = true; card.dataset.index = idx;
+        const img = document.createElement('img'); img.src = item.url; img.alt = item.name;
+
+        const meta = document.createElement('div');
+        meta.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong style="font-size:0.95rem">${item.name}</strong>
+            <button class="handle" title="Drag to reorder">⬍ Drag</button>
+          </div>
+          <div class="row">
+            <button class="btn" data-action="up">↑ Up</button>
+            <button class="btn" data-action="down">↓ Down</button>
+            <button class="btn danger" data-action="remove">Delete</button>
+          </div>
+          <div class="meta">Order: ${idx+1}</div>
+        `;
+
+        card.appendChild(img); card.appendChild(meta); grid.appendChild(card);
+
+        card.addEventListener('dragstart', ev => { card.classList.add('dragging'); ev.dataTransfer.setData('text/index', String(idx)); });
+        card.addEventListener('dragend', () => card.classList.remove('dragging'));
+        card.addEventListener('dragover', ev => ev.preventDefault());
+        card.addEventListener('drop', ev => { ev.preventDefault(); const from = Number(ev.dataTransfer.getData('text/index')); const to = Number(card.dataset.index); reorder(from,to); });
+
+        meta.querySelector('[data-action="up"]').addEventListener('click',()=>reorder(idx,Math.max(0,idx-1)));
+        meta.querySelector('[data-action="down"]').addEventListener('click',()=>reorder(idx,Math.min(state.files.length-1,idx+1)));
+        meta.querySelector('[data-action="remove"]').addEventListener('click',()=>{ state.files.splice(idx,1); render(); });
+      });
+    }
+
+    function reorder(from,to){if(from===to||from<0||to<0||from>=state.files.length||to>=state.files.length)return; const [item]=state.files.splice(from,1); state.files.splice(to,0,item); render();}
+
+    async function normalizeImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+            const base64 = dataUrl.split(',')[1];
+            const bytes = Uint8Array.from(atob(base64), c=>c.charCodeAt(0));
+            resolve(bytes);
+          };
+          img.onerror = reject;
+          img.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    makeBtn.addEventListener('click', async () => {
+      if(!state.files.length){ alert('Add at least one image.'); return; }
+      progressBar.style.width='0%';
+
+      const marginMm = Number(document.getElementById('marginMm').value)||0; // default 0
+      const onePer = document.getElementById('onePerPage').checked;
+      const mmToPt = mm => mm*2.834645669;
+      const marginPt = mmToPt(marginMm);
+
+      const { PDFDocument, StandardFonts } = PDFLib;
+      const pdfDoc = await PDFDocument.create();
+      await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+      let progress = 0;
+      const updateProgress = () => { progress++; progressBar.style.width = `${Math.round(progress/state.files.length*100)}%`; };
+
+      for(const item of state.files){
+        const jpgBytes = await normalizeImage(item.file);
+        const embeddedImage = await pdfDoc.embedJpg(jpgBytes);
+
+        const imgW = embeddedImage.width;
+        const imgH = embeddedImage.height;
+
+        // --- Dynamic page sizing ---
+        const targetLong = 841.89; // long side default
+        let pageW, pageH;
+        if (imgW >= imgH) {
+          pageW = targetLong;
+          pageH = Math.round(targetLong * (imgH / imgW));
+        } else {
+          pageH = targetLong;
+          pageW = Math.round(targetLong * (imgW / imgH));
+        }
+
+        const drawW = pageW - 2*marginPt;
+        const drawH = pageH - 2*marginPt;
+
+        const page = pdfDoc.addPage([pageW, pageH]);
+        page.drawImage(embeddedImage, { x: marginPt, y: marginPt, width: drawW, height: drawH });
+
+        updateProgress();
+      }
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes],{type:'application/pdf'});
+      const url = URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download=`images-${Date.now()}.pdf`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),5000);
+    });
+  </script>
+</body>
+</html>
