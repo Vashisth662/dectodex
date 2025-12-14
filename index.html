@@ -1,16 +1,239 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Dectodex</title>
-  <style>
-    body { font-family: Arial; text-align: center; margin-top: 50px; }
-    h1 { color: #2c3e50; }
-    p { color: #34495e; font-size: 18px; }
-  </style>
+<meta charset="UTF-8">
+<title>Dectodex</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI", system-ui, sans-serif;
+}
+
+body{
+  min-height:100vh;
+  overflow:hidden;
+  color:#fff;
+  background:#000;
+}
+
+/* ===== BACKGROUND DIMENSION ===== */
+.dimension{
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at 20% 35%, rgba(0,160,255,.55), transparent 45%),
+    radial-gradient(circle at 80% 65%, rgba(255,0,90,.55), transparent 45%),
+    linear-gradient(135deg,#020412,#0b1230,#2a0718);
+  animation: dimensionMove 18s infinite alternate ease-in-out;
+}
+
+.dimension::before{
+  content:"";
+  position:absolute;
+  inset:-30%;
+  background:
+    repeating-linear-gradient(
+      110deg,
+      transparent 0%,
+      transparent 47%,
+      rgba(0,200,255,.35) 48%,
+      transparent 49%
+    ),
+    repeating-linear-gradient(
+      -110deg,
+      transparent 0%,
+      transparent 47%,
+      rgba(255,0,120,.35) 48%,
+      transparent 49%
+    );
+  animation: lightningFlash 3.5s infinite;
+}
+
+@keyframes lightningFlash{
+  0%,88%,100%{opacity:0;}
+  90%{opacity:1;}
+  94%{opacity:.6;}
+}
+
+@keyframes dimensionMove{
+  from{background-position:0% 0%;}
+  to{background-position:100% 100%;}
+}
+
+/* ===== HEADER ===== */
+.header{
+  position:relative;
+  z-index:2;
+  padding:30px 50px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.logo{
+  font-size:34px;
+  letter-spacing:3px;
+  background:linear-gradient(90deg,#00d4ff,#ff005d);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-shadow:
+    0 0 20px rgba(0,200,255,.5),
+    0 0 30px rgba(255,0,120,.4);
+}
+
+.nav a{
+  margin-left:30px;
+  text-decoration:none;
+  color:#dfe6ff;
+  font-size:16px;
+  position:relative;
+}
+
+.nav a::after{
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:-6px;
+  width:0;
+  height:2px;
+  background:linear-gradient(90deg,#00c6ff,#ff005d);
+  transition:.3s;
+}
+
+.nav a:hover::after{
+  width:100%;
+}
+
+/* ===== MAIN CONTENT ===== */
+.main{
+  position:relative;
+  z-index:2;
+  min-height:calc(100vh - 120px);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 50px;
+  gap:60px;
+}
+
+/* LEFT TEXT */
+.hero{
+  max-width:520px;
+}
+
+.hero h1{
+  font-size:52px;
+  margin-bottom:20px;
+  line-height:1.1;
+}
+
+.hero p{
+  font-size:18px;
+  color:#dfe6ff;
+}
+
+/* RIGHT PANEL */
+.panel{
+  width:380px;
+  padding:35px;
+  border-radius:26px;
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(12px);
+  box-shadow:
+    0 0 60px rgba(0,180,255,.45),
+    0 0 60px rgba(255,0,120,.35);
+}
+
+.panel h2{
+  text-align:center;
+  margin-bottom:25px;
+  font-size:22px;
+}
+
+.tool{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  text-decoration:none;
+  padding:18px 20px;
+  margin-bottom:16px;
+  border-radius:16px;
+  font-size:18px;
+  color:#fff;
+  background:linear-gradient(135deg, rgba(0,200,255,.55), rgba(255,0,120,.55));
+  border:1px solid rgba(255,255,255,.25);
+  transition:.35s;
+}
+
+.tool:hover{
+  transform:translateY(-5px) scale(1.04);
+  box-shadow:
+    0 0 35px rgba(0,220,255,.9),
+    0 0 35px rgba(255,0,120,.9);
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .main{
+    flex-direction:column;
+    text-align:center;
+  }
+  .panel{
+    width:100%;
+  }
+  .hero h1{
+    font-size:42px;
+  }
+}
+</style>
 </head>
+
 <body>
-  <h1>Welcome to Dectodex</h1>
-  <p>This is my simple informative website.</p>
+
+<div class="dimension"></div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">DECTODEX</div>
+  <div class="nav">
+    <a href="/blog">Blog</a>
+    <a href="/image-to-pdf">Image to PDF</a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LEFT -->
+  <div class="hero">
+    <h1>Enter a New Digital Dimension</h1>
+    <p>
+      Dectodex is a futuristic web platform powered by red and blue energy,
+      delivering fast, secure, and beautifully designed online tools
+      and technical insights through our blog.
+    </p>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="panel">
+    <h2>⚡ Tools</h2>
+
+    <a class="tool" href="/image-to-pdf">
+      Image to PDF Converter
+      <span>➜</span>
+    </a>
+
+    <a class="tool" href="/blog">
+      Dectodex Blog
+      <span>➜</span>
+    </a>
+  </div>
+
+</div>
+
 </body>
 </html>
-
