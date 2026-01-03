@@ -20,7 +20,7 @@ body{
   background:#000;
 }
 
-/* ===== BACKGROUND DIMENSION ===== */
+/* ===== BACKGROUND ===== */
 .dimension{
   position:fixed;
   inset:0;
@@ -36,20 +36,8 @@ body{
   position:absolute;
   inset:-30%;
   background:
-    repeating-linear-gradient(
-      110deg,
-      transparent 0%,
-      transparent 47%,
-      rgba(0,200,255,.35) 48%,
-      transparent 49%
-    ),
-    repeating-linear-gradient(
-      -110deg,
-      transparent 0%,
-      transparent 47%,
-      rgba(255,0,120,.35) 48%,
-      transparent 49%
-    );
+    repeating-linear-gradient(110deg, transparent 0%, transparent 47%, rgba(0,200,255,.35) 48%, transparent 49%),
+    repeating-linear-gradient(-110deg, transparent 0%, transparent 47%, rgba(255,0,120,.35) 48%, transparent 49%);
   animation: lightningFlash 3.5s infinite;
 }
 
@@ -64,14 +52,14 @@ body{
   to{background-position:100% 100%;}
 }
 
-/* ===== HEADER ===== */
+
 .header{
   position:relative;
   z-index:2;
   padding:30px 50px;
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
 }
 
 .logo{
@@ -80,9 +68,6 @@ body{
   background:linear-gradient(90deg,#00d4ff,#ff005d);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
-  text-shadow:
-    0 0 20px rgba(0,200,255,.5),
-    0 0 30px rgba(255,0,120,.4);
 }
 
 .nav a{
@@ -104,11 +89,9 @@ body{
   transition:.3s;
 }
 
-.nav a:hover::after{
-  width:100%;
-}
+.nav a:hover::after{width:100%;}
 
-/* ===== MAIN CONTENT ===== */
+
 .main{
   position:relative;
   z-index:2;
@@ -120,23 +103,72 @@ body{
   gap:60px;
 }
 
-/* LEFT TEXT */
+/* ===== HERO (LEFT) ===== */
 .hero{
-  max-width:520px;
+  max-width:560px;
 }
 
+/* GAME CTA */
+.game-left{
+  margin-bottom:45px;
+}
+
+.game-label{
+  font-size:15px;
+  letter-spacing:3px;
+  color:#9feaff;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.game-label span{
+  animation: arrowPulse 1.5s infinite;
+}
+
+@keyframes arrowPulse{
+  0%{transform:translateX(0); opacity:.6;}
+  50%{transform:translateX(6px); opacity:1;}
+  100%{transform:translateX(0); opacity:.6;}
+}
+
+.game-main-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:space-between;
+  width:300px;
+  padding:22px 26px;
+  border-radius:22px;
+  font-size:22px;
+  font-weight:600;
+  color:#fff;
+  text-decoration:none;
+  background:linear-gradient(135deg, rgba(0,255,180,.8), rgba(0,120,255,.8));
+  border:1px solid rgba(255,255,255,.35);
+  transition:.35s;
+}
+
+.game-main-btn:hover{
+  transform:translateY(-7px) scale(1.07);
+  box-shadow:
+    0 0 60px rgba(0,255,200,.9),
+    0 0 60px rgba(0,120,255,.9);
+}
+
+/* HERO TEXT (SECONDARY) */
 .hero h1{
-  font-size:52px;
-  margin-bottom:20px;
-  line-height:1.1;
+  font-size:46px;
+  margin-bottom:18px;
 }
 
 .hero p{
   font-size:18px;
   color:#dfe6ff;
+  line-height:1.6;
 }
 
-/* RIGHT PANEL */
+/* ===== RIGHT PANEL ===== */
 .panel{
   width:380px;
   padding:35px;
@@ -151,42 +183,34 @@ body{
 .panel h2{
   text-align:center;
   margin-bottom:25px;
-  font-size:22px;
 }
 
 .tool{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  text-decoration:none;
   padding:18px 20px;
   margin-bottom:16px;
   border-radius:16px;
   font-size:18px;
   color:#fff;
+  text-decoration:none;
   background:linear-gradient(135deg, rgba(0,200,255,.55), rgba(255,0,120,.55));
-  border:1px solid rgba(255,255,255,.25);
   transition:.35s;
 }
 
 .tool:hover{
   transform:translateY(-5px) scale(1.04);
-  box-shadow:
-    0 0 35px rgba(0,220,255,.9),
-    0 0 35px rgba(255,0,120,.9);
+  box-shadow:0 0 35px rgba(0,220,255,.9);
 }
 
-/* RESPONSIVE */
+/* ===== RESPONSIVE ===== */
 @media(max-width:900px){
   .main{
     flex-direction:column;
     text-align:center;
   }
-  .panel{
-    width:100%;
-  }
-  .hero h1{
-    font-size:42px;
+  .game-main-btn{
+    margin:0 auto;
   }
 }
 </style>
@@ -205,17 +229,32 @@ body{
   </div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
   <!-- LEFT -->
   <div class="hero">
+
+    <!-- GAME FIRST -->
+    <div class="game-left">
+      <div class="game-label">
+        PLAY A GAME <span>➜</span>
+      </div>
+
+      <a class="game-main-btn" href="/tools/victor-runner/">
+        Spike Runner 🎮
+        <span>➜</span>
+      </a>
+    </div>
+
+    
     <h1>Enter a New Digital Dimension</h1>
+
     <p>
       Dectodex is a futuristic web platform powered by red and blue energy,
       delivering fast, secure, and beautifully designed online tools
       and technical insights through our blog.
     </p>
+
   </div>
 
   <!-- RIGHT -->
@@ -223,12 +262,12 @@ body{
     <h2>⚡ Tools</h2>
 
     <a class="tool" href="/image-to-pdf">
-      Image to PDF Converter
+      Image to PDF
       <span>➜</span>
     </a>
 
     <a class="tool" href="/blog">
-      Dectodex Blog
+      Blog
       <span>➜</span>
     </a>
   </div>
