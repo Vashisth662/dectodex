@@ -145,41 +145,35 @@ bgMusic.volume = 0.17;
 
 
 
-const BASE_W = 360;
-const BASE_H = 640;
+const DESKTOP_W = 1280;
+const DESKTOP_H = 720;
 
 function resize() {
-  const isMobile = window.innerWidth < 768;
+  const screenW = window.innerWidth;
+  const screenH = window.innerHeight;
 
-  if (isMobile) {
-    // MOBILE: fixed game size, visual scaling
-    canvas.width = BASE_W;
-    canvas.height = BASE_H;
+  
+  canvas.width = DESKTOP_W;
+  canvas.height = DESKTOP_H;
 
-    const scale = Math.min(
-      window.innerWidth / BASE_W,
-      window.innerHeight / BASE_H
-    );
+  
+  const scale = Math.min(
+    screenW / DESKTOP_W,
+    screenH / DESKTOP_H
+  );
 
-    canvas.style.width = BASE_W * scale + "px";
-    canvas.style.height = BASE_H * scale + "px";
-    canvas.style.position = "absolute";
-    canvas.style.left = "50%";
-    canvas.style.top = "50%";
-    canvas.style.transform = "translate(-50%, -50%)";
-  } else {
-    // DESKTOP: your original behavior
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
-    canvas.style.width = "";
-    canvas.style.height = "";
-    canvas.style.position = "";
-    canvas.style.transform = "";
-  }
+  canvas.style.width = DESKTOP_W * scale + "px";
+  canvas.style.height = DESKTOP_H * scale + "px";
+
+  canvas.style.position = "absolute";
+  canvas.style.left = "50%";
+  canvas.style.top = "50%";
+  canvas.style.transform = "translate(-50%, -50%)";
 }
 
 resize();
 window.addEventListener("resize", resize);
+
 
 
 /* ================= WORLD ================= */
