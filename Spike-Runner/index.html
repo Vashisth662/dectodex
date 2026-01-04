@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Spikes-Runner</title>
 <style>
-html, body { margin:0; background:#000; overflow:hidden; }
+html, body { margin:0; background:#000; overflow:hidden; } /* MY FIRST 2D GAME I HOPE YOU LIKE */
 canvas { display:block; }
 .ui {
   position:fixed;
@@ -44,18 +44,138 @@ canvas { display:block; }
 
 }
 </style>
+<head>
+<meta charset="UTF-8">
+<title>Spikes-Runner</title>
+
+<style>
+html, body {
+  margin:0;
+  background:#000;
+  overflow:hidden;
+}
+canvas { display:block; }
+
+.ui {
+  position:fixed;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  color:#aaa;
+  font-family:monospace;
+  text-align:center;
+}
+
+.banner {
+  position:fixed;
+  top:18px;
+  left:50%;
+  transform:translateX(-50%);
+  color:#fff;
+  font-family:monospace;
+  background:rgba(0,0,0,0.4);
+  padding:8px 12px;
+  border:1px solid rgba(255,255,255,0.2);
+}
+
+.portalText {
+  position:fixed;
+  top:56px;
+  left:50%;
+  transform:translateX(-50%);
+  color:#0ff;
+  font-family:monospace;
+  background:rgba(0,15,15,0.5);
+  padding:6px 10px;
+  border:1px solid rgba(0,255,255,0.25);
+  display:none;
+}
+
+/* MOBILE CONTROLS */
+#stepZone {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 70%;
+  height: 40%;
+  background: rgba(0,0,0,0.15);
+  z-index: 999;
+}
+
+#jumpBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(45deg,#00ffd5,#00aaff);
+  color: #000;
+  font-size: 22px;
+  font-weight: bold;
+  border: none;
+  z-index: 1000;
+}
+
+
+@media (pointer: fine) {
+  #stepZone,
+  #jumpBtn {
+    display: none !important;
+  }
+}
+
+</style>
 </head>
+
+
 <body>
+  <div class="banner" id="banner"></div>
+<div class="portalText" id="portalText"></div>
 
 
+<button id="restartBtn" style="
+  display:none;
+  position:fixed;
+  top:60%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  padding:10px 22px;
+  font-size:18px;
+  font-family:bold 60px Arial;  
+  letter-spacing:2px;                             
+  background:linear-gradient(45deg, #ff4444, #ff8855); 
+  color:#000000;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  text-shadow:0 0 6px #ff7777, 0 0 10px #ff2222;  
+  z-index:1000;
+  transition:0.2s all;
+">
+  RESTART
+</button>
+
+
+
+<!-- MOBILE CONTROLS -->
+<div id="stepZone"></div>
+<button id="jumpBtn">JUMP</button>
 
 
 <canvas id="game"></canvas>
 
 <div class="ui">
-MOBILE: TAP L/R • DOUBLE TAP JUMP  |    
-DESKTOP: MOUSE CLICK L = left leg / R = right leg • SPACE JUMP<br>
+  <div class="controlsText">
+    
+    🖱️ LEFT CLICK = Left leg • RIGHT CLICK = Right leg<br>
+    ⌨️ SPACE = JUMP<br>
+    📱 TAP SLOW/FAST = STEP/RUN<br>
+    🔵 JUMP BUTTON = JUMP
+  </div>
 </div>
+
+
 
 <div class="banner" id="banner"></div>
 <div class="portalText" id="portalText"></div>
@@ -63,6 +183,7 @@ DESKTOP: MOUSE CLICK L = left leg / R = right leg • SPACE JUMP<br>
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+
 
 
 
@@ -153,10 +274,13 @@ function resize() {
   const screenH = window.innerHeight;
 
   
-  canvas.width = DESKTOP_W;
-  canvas.height = DESKTOP_H;
+  const isMobile = window.innerWidth < 900;
 
-  
+canvas.width = isMobile ? 960 : DESKTOP_W;
+canvas.height = isMobile ? 540 : DESKTOP_H;
+
+
+
   const scale = Math.min(
     screenW / DESKTOP_W,
     screenH / DESKTOP_H
@@ -173,7 +297,6 @@ function resize() {
 
 resize();
 window.addEventListener("resize", resize);
-
 
 
 /* ================= WORLD ================= */
@@ -276,36 +399,43 @@ addEventListener("mousedown", e => {
 
 
 
-addEventListener("touchstart", e => {
-  if (gameWon) return;
+
+// ===== MOBILE CONTROLS =====
+let nextLegLeft = true;
+
+const stepZone = document.getElementById("stepZone");
+const jumpBtn = document.getElementById("jumpBtn");
+
+stepZone.addEventListener("touchstart", e => {
   e.preventDefault();
+  if (dead || gameWon) return;
   unlockAudio();
-
-  if (dead) {
-    resetGame();
-    return;
-  }
-
-  const touchX = e.touches[0].clientX;
-  const mid = innerWidth / 2;
 
   playStep();
 
-  if (touchX < mid) {
-    frame = FRAMES.LEFT;
-    player.x += 20;
-    distance += 20;
-  } else {
-    frame = FRAMES.RIGHT;
-    player.x += 20;
-    distance += 20;
-  }
+  frame = nextLegLeft ? FRAMES.LEFT : FRAMES.RIGHT;
+  nextLegLeft = !nextLegLeft;
 
+  player.x += 20;
+  distance += 20;
   player.stepTimer = 4;
 }, { passive:false });
 
+jumpBtn.addEventListener("touchstart", e => {
+  e.preventDefault();
+  if (dead || gameWon) return;
 
+  if (player.onGround) {
+    player.vy = -18;
+    player.onGround = false;
+    frame = FRAMES.JUMP;
 
+    jumpSound.currentTime = 0;
+    jumpSound.play();
+  }
+}, { passive:false });
+
+/*==JUMP(SPACE)==*/
 addEventListener("keydown", e => {
   if (e.code === "Space" && player.onGround) {
     unlockAudio();
@@ -322,18 +452,7 @@ addEventListener("keydown", e => {
 
 let lastTap = 0;
 
-addEventListener("touchend", () => {
-  const now = performance.now();
-  if (now - lastTap < 300 && player.onGround && !dead) {
-    player.vy = -18;
-    player.onGround = false;
-    frame = FRAMES.JUMP;
 
-    jumpSound.currentTime = 0;
-    jumpSound.play();
-  }
-  lastTap = now;
-});
 
 
 
@@ -750,7 +869,7 @@ function drawStarport() {
   }
 }
 
-/* 22 maps total: 3 image + 19  */
+/* 22 maps total: 3 image + 19 (Can you beat these maps ? ) */
 const MAPS = [
   { name:"Ice mountains ", draw: drawImageMap },
   { name:"Deep space ", draw: drawSpaceImageMap },
@@ -787,12 +906,29 @@ const portal = {
   w: 70,
   h: 140,
   targetIndex: 0,
-  lastSpawnTime: performance.now() + 10000, // first spawn in 30s
+  lastSpawnTime: performance.now() + 10000, 
   spawnInterval: 10000
 };
 
 const portalTextEl = document.getElementById("portalText");
 const bannerEl = document.getElementById("banner");
+
+const restartBtn = document.getElementById("restartBtn");
+restartBtn.addEventListener("click", () => {
+  hideRestartButton();
+  resetGame();
+});
+
+
+
+function showRestartButton() {
+  restartBtn.style.display = "block";
+}
+
+function hideRestartButton() {
+  restartBtn.style.display = "none";
+}
+
 
 function spawnPortal() {
   const groundBaseline = canvas.height - groundH;
@@ -819,7 +955,7 @@ function spawnPortal() {
 function despawnPortal() {
   portal.active = false;
   portalTextEl.style.display = "none";
-  portal.lastSpawnTime = performance.now() + portal.spawnInterval; // ensure full 30s wait
+  portal.lastSpawnTime = performance.now() + portal.spawnInterval; 
 }
 
 addEventListener("mousedown", e => {
@@ -829,9 +965,8 @@ difficulty = 1;
 spikeSpeed = 2;
 spikeInterval = 90;
 
-  if (dead || gameWon) {
-  resetGame();
-}
+if (dead || gameWon) return; 
+
 
 });
 
@@ -865,6 +1000,7 @@ function resetGame() {
   gameWon = false;
   groundSpeed = treadmill;                  
 lastSpeedIncrease = performance.now(); 
+hideRestartButton();
 
   bgMusic.currentTime = 0;
   bgMusic.play().catch(()=>{});
@@ -913,6 +1049,9 @@ function playStep() {
 function loop(){
   
 
+  
+
+
   if (gameWon) {
   bgMusic.pause();
 
@@ -949,7 +1088,7 @@ if (!dead && performance.now() - lastSpeedIncrease >= SPEED_INTERVAL) {
     lastSpeedIncrease = performance.now();
 }
 
-// ===== SCORE UPDATE =====
+
 
 
 score = Math.floor(distance / 50);
@@ -1026,10 +1165,9 @@ if (dead) {
       canvas.height / 2 + 20
     );
 
-    // Restart Instruction
-    ctx.font = "20px Arial";
-    ctx.fillStyle = "#aaaaaa";
-    ctx.fillText("CLICK TO RESTART", canvas.width / 2, canvas.height / 2 + 80);
+    // SHOW BUTTON INSTEAD OF TEXT
+showRestartButton();
+
 
     requestAnimationFrame(loop);
     return;
@@ -1066,7 +1204,7 @@ if (
 
 
 
-// dynamically adjust interval based on difficulty
+
 spikeInterval = Math.max(50, 90 - difficulty * 10);
 
 
@@ -1201,10 +1339,10 @@ for (let i = spikes.length - 1; i >= 0; i--) {
                       playerBox.y > portalBox.y + portalBox.h);
 
     if (overlap) {
-      // Warp to target map
+      
       currentMapIndex = portal.targetIndex;
       
-      // Only add to visitedMaps if it's not already there
+      
       if (!visitedMaps.includes(currentMapIndex)) {
           visitedMaps.push(currentMapIndex);
       }
