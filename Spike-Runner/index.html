@@ -145,8 +145,42 @@ bgMusic.volume = 0.17;
 
 
 
-function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
-resize(); addEventListener("resize", resize);
+const BASE_W = 360;
+const BASE_H = 640;
+
+function resize() {
+  const isMobile = window.innerWidth < 768;
+
+  if (isMobile) {
+    // MOBILE: fixed game size, visual scaling
+    canvas.width = BASE_W;
+    canvas.height = BASE_H;
+
+    const scale = Math.min(
+      window.innerWidth / BASE_W,
+      window.innerHeight / BASE_H
+    );
+
+    canvas.style.width = BASE_W * scale + "px";
+    canvas.style.height = BASE_H * scale + "px";
+    canvas.style.position = "absolute";
+    canvas.style.left = "50%";
+    canvas.style.top = "50%";
+    canvas.style.transform = "translate(-50%, -50%)";
+  } else {
+    // DESKTOP: your original behavior
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+    canvas.style.width = "";
+    canvas.style.height = "";
+    canvas.style.position = "";
+    canvas.style.transform = "";
+  }
+}
+
+resize();
+window.addEventListener("resize", resize);
+
 
 /* ================= WORLD ================= */
 const groundH = 140;
