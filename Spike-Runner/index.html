@@ -303,11 +303,10 @@ const groundH = 140;
 const fenceX = 40;
 const gravity = 0.6;
 // ===== SPEED SETTINGS =====
-let treadmill = 1;    
+let treadmill = 1.2;    
 let groundSpeed = treadmill;
-const SPEED_STEP = 0.047;   
-const SPEED_INTERVAL = 10000; 
-const MAX_SPEED = 2;      
+const PORTAL_SPEED_STEP = 0.019;
+const MAX_SPEED = 1.5;      
 let lastSpeedIncrease = performance.now(); 
 
 
@@ -1006,7 +1005,7 @@ function resetGame() {
   dead = false;
   score = 0;
   distance = 0;
-  treadmill = 1;
+  treadmill = 1.2;
   visitedMaps = [0];
   gameWon = false;
   groundSpeed = treadmill;                  
@@ -1091,14 +1090,7 @@ function loop(){
   return; 
 }
 
-  // ===== SPEED INCREASE EVERY 11 SECONDS =====
-if (!dead && performance.now() - lastSpeedIncrease >= SPEED_INTERVAL) {
-    treadmill += SPEED_STEP;
-    if (treadmill > MAX_SPEED) treadmill = MAX_SPEED;
-    groundSpeed = treadmill;
-    lastSpeedIncrease = performance.now();
-}
-
+ 
 
 
 
@@ -1352,8 +1344,11 @@ for (let i = spikes.length - 1; i >= 0; i--) {
     if (overlap) {
       
       currentMapIndex = portal.targetIndex;
-      
-      
+
+      treadmill += PORTAL_SPEED_STEP;  
+      if (treadmill > MAX_SPEED) treadmill = MAX_SPEED;  
+      groundSpeed = treadmill;
+
       if (!visitedMaps.includes(currentMapIndex)) {
           visitedMaps.push(currentMapIndex);
       }
