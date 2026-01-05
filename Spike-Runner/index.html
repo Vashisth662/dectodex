@@ -130,8 +130,7 @@ canvas { display:block; }
 
 
 <body>
-  <div class="banner" id="banner"></div>
-<div class="portalText" id="portalText"></div>
+id="portalText"></div>
 
 
 <button id="restartBtn" style="
@@ -302,7 +301,7 @@ window.addEventListener("resize", resize);
 /* ================= WORLD ================= */
 const groundH = 140;
 const fenceX = 40;
-const gravity = 0.8;
+const gravity = 0.6;
 // ===== SPEED SETTINGS =====
 let treadmill = 1;    
 let groundSpeed = treadmill;
@@ -317,7 +316,7 @@ const tileWidth = 100;
 let tiles = [];
 let spikes = [];
 let difficulty = 1;
-let spikeTimer = 0;
+
 let spikeInterval = 75; // frames
 let spikeSpeed = 1 ;
 const MAX_SPIKES = 3;        
@@ -450,7 +449,7 @@ addEventListener("keydown", e => {
 });
 
 
-let lastTap = 0;
+
 
 
 
@@ -479,44 +478,58 @@ function rand(min,max){ return Math.random()*(max-min)+min; }
 
 
 function drawImageMap() {
-  if (bgReady) {
-   
-    const targetH = canvas.height;
-    const scale = targetH / bgImage.height;
-    const targetW = bgImage.width * scale;
-    let startX = (bgOffset * 0.6) % targetW;
-    if (startX > 0) startX -= targetW;
-    for (let x = startX; x < canvas.width; x += targetW) {
-      ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, x, 0, targetW, targetH);
-    }
-  } else {
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-  }
-}
-function drawSpaceImageMap() {
-  if (!bgSpaceImg.complete) return;
+  if (!bgImage.complete) return;
+
   const targetH = canvas.height;
-  const scale = targetH / bgSpaceImg.height;
-  const targetW = bgSpaceImg.width * scale;
+  const scale = targetH / bgImage.height;
+  const targetW = bgImage.width * scale;
+
   let startX = (bgOffset * 0.6) % targetW;
   if (startX > 0) startX -= targetW;
+
   for (let x = startX; x < canvas.width; x += targetW) {
-    ctx.drawImage(bgSpaceImg, 0, 0, bgSpaceImg.width, bgSpaceImg.height, x, 0, targetW, targetH);
+    ctx.drawImage(
+      bgImage,
+      0, 0, bgImage.width, bgImage.height,
+      x, 0, targetW, targetH
+    );
   }
 }
 
+function drawSpaceImageMap() {
+  if (!bgSpaceImg.complete) return;
+
+  const targetH = canvas.height;
+  const scale = targetH / bgSpaceImg.height;
+  const targetW = bgSpaceImg.width * scale;
+
+  let startX = (bgOffset * 0.6) % targetW;
+  if (startX > 0) startX -= targetW;
+
+  for (let x = startX; x < canvas.width; x += targetW) {
+    ctx.drawImage(bgSpaceImg, 0, 0, bgSpaceImg.width, bgSpaceImg.height,
+      x, 0, targetW, targetH);
+  }
+}
+
+
 function drawDarkFantasyImageMap() {
   if (!bgDarkFantasyImg.complete) return;
+
   const targetH = canvas.height;
   const scale = targetH / bgDarkFantasyImg.height;
   const targetW = bgDarkFantasyImg.width * scale;
+
   let startX = (bgOffset * 0.6) % targetW;
   if (startX > 0) startX -= targetW;
+
   for (let x = startX; x < canvas.width; x += targetW) {
-    ctx.drawImage(bgDarkFantasyImg, 0, 0, bgDarkFantasyImg.width, bgDarkFantasyImg.height, x, 0, targetW, targetH);
+    ctx.drawImage(bgDarkFantasyImg, 0, 0,
+      bgDarkFantasyImg.width, bgDarkFantasyImg.height,
+      x, 0, targetW, targetH);
   }
 }
+
 
 function drawStars() {
   ctx.fillStyle = "#000"; ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -983,9 +996,7 @@ addEventListener("click", () => {
 
 
 
-
 function drawBackground() {
-  
   bgOffset += treadmill;
   MAPS[currentMapIndex].draw();
 }
