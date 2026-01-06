@@ -184,6 +184,8 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 
+let speedScale = 1;
+let lastFrameTime = performance.now();
 
 
 let gameStarted = false; 
@@ -301,12 +303,12 @@ window.addEventListener("resize", resize);
 /* ================= WORLD ================= */
 const groundH = 140;
 const fenceX = 40;
-const gravity = 0.6;
+const gravity = 0.950;
 // ===== SPEED SETTINGS =====
-let treadmill = 1.2;    
+let treadmill = 3.6;    
 let groundSpeed = treadmill;
-const PORTAL_SPEED_STEP = 0.019;
-const MAX_SPEED = 1.5;      
+const PORTAL_SPEED_STEP = 0.02857;
+const MAX_SPEED =4.2;      
 let lastSpeedIncrease = performance.now(); 
 
 
@@ -996,7 +998,8 @@ addEventListener("click", () => {
 
 
 function drawBackground() {
-  bgOffset += treadmill;
+  bgOffset += treadmill * speedScale;
+
   MAPS[currentMapIndex].draw();
 }
 
@@ -1005,7 +1008,7 @@ function resetGame() {
   dead = false;
   score = 0;
   distance = 0;
-  treadmill = 1.2;
+  treadmill = 3.6;
   visitedMaps = [0];
   gameWon = false;
   groundSpeed = treadmill;                  
@@ -1057,6 +1060,12 @@ function playStep() {
 
 
 function loop(){
+  const now = performance.now();
+  speedScale = (now - lastFrameTime) / 16.666;
+  lastFrameTime = now;
+
+  if (speedScale > 2) speedScale = 2; // safety clamp
+
   
 
   
@@ -1137,7 +1146,8 @@ if (!spikesEnabled && spikeCycleTimer >= SPIKES_OFF_TIME) {
 
   /* ---- PLATFORM UPDATE ---- */
   for (let tile of tiles) {
-    tile.x -= groundSpeed;
+    tile.x -= groundSpeed * speedScale;
+
     if (tile.x + tileWidth < 0) {
       tile.x = Math.max(...tiles.map(t => t.x)) + tileWidth;
     }
@@ -1219,7 +1229,8 @@ spikeInterval = Math.max(35, 90 - difficulty * 10);
 ctx.fillStyle = "gray";
 for (let i = spikes.length - 1; i >= 0; i--) {
   const s = spikes[i];
-  s.x -= spikeSpeed + treadmill;
+  s.x -= (spikeSpeed + treadmill) * speedScale;
+
 
   ctx.beginPath();
   ctx.moveTo(s.x, s.y + s.h);
@@ -1243,13 +1254,14 @@ for (let i = spikes.length - 1; i >= 0; i--) {
   }
 
   if (!dead) {
-    player.x -= treadmill;
-    // ===== DISTANCE BASED SCORE =====
-     distance += treadmill;
+    player.x -= treadmill * speedScale;
+distance += treadmill * speedScale;
+
      score = Math.floor(distance / 5); 
 
-    player.vy += gravity;
-    player.y += player.vy;
+    player.vy += gravity * speedScale;
+player.y += player.vy * speedScale;
+
 
     const groundY = groundBaseline - targetHeight + 160; 
     if (player.y >= groundY) {
@@ -1305,7 +1317,7 @@ for (let i = spikes.length - 1; i >= 0; i--) {
   for (let y=0; y<canvas.height; y+=20) ctx.fillRect(canvas.width - 50, y, 10, 10);
 
   /* ---- PORTAL TIMER / SPAWN ---- */
-  const now = performance.now();
+  
   if (!portal.active && now >= portal.lastSpawnTime) {
     spawnPortal();
   }
@@ -1313,7 +1325,8 @@ for (let i = spikes.length - 1; i >= 0; i--) {
   /* ---- PORTAL DRAW ---- */
   if (portal.active) {
     
-    portal.x -= treadmill;
+   portal.x -= treadmill * speedScale;
+
 
     // Portal body
     const grd = ctx.createLinearGradient(portal.x, portal.y, portal.x+portal.w, portal.y+portal.h);
