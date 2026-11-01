@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nocturne – URL to MP3</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Manrope:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme: dark;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top,0px);
+  padding-bottom: env(safe-area-inset-bottom,0px);
+  --abyss:#07060d;
+  --fog:#2b1f4d;
+  --mist:#8a6fc4;
+  --moon:#4fc3ff;
+  --deep:#144a78;
+  --ember:#e8542a;
+  --blood:#a50f2a;
+  --silver:#e6ebf5;
+  --muted:#a9b0c6;
+  --panel:rgba(14,12,26,.62);
+  --line:rgba(160,190,255,.22);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{
+  margin:0;min-height:100vh;background:var(--abyss);color:var(--silver);
+  font-family:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6;
+  overflow-x:hidden;position:relative;
+}
+/* atmosphere */
+.sky{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+   radial-gradient(60% 50% at 15% 10%,rgba(138,111,196,.42),transparent 70%),
+   radial-gradient(55% 45% at 90% 15%,rgba(79,195,255,.30),transparent 70%),
+   radial-gradient(70% 40% at 50% 105%,rgba(165,15,42,.55),transparent 70%),
+   linear-gradient(180deg,#0b0a1a 0%,#0a1224 45%,#12060c 100%);}
+.shaft{position:fixed;z-index:0;pointer-events:none;top:-20%;right:-10%;width:60vw;height:140vh;
+  background:linear-gradient(200deg,rgba(190,230,255,.28),rgba(79,195,255,.08) 40%,transparent 70%);
+  transform:rotate(18deg);filter:blur(24px);mix-blend-mode:screen}
+.fog{position:fixed;z-index:0;pointer-events:none;border-radius:50%;filter:blur(70px);opacity:.55}
+.fog.a{width:55vw;height:40vh;left:-15vw;top:30vh;background:var(--mist);animation:drift 26s ease-in-out infinite alternate}
+.fog.b{width:50vw;height:35vh;right:-12vw;bottom:5vh;background:var(--blood);opacity:.4;animation:drift 32s ease-in-out infinite alternate-reverse}
+@keyframes drift{to{transform:translate(8vw,-6vh) scale(1.15)}}
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.14;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+/* layout */
+main{position:relative;z-index:2;max-width:760px;margin:0 auto;padding:12vh 20px 8vh;text-align:center}
+h1{font-family:"Cinzel",Georgia,"Times New Roman",serif;font-weight:700;
+  font-size:clamp(2.4rem,7vw,4.4rem);line-height:1.05;margin:0 0 16px;letter-spacing:.01em;
+  background:linear-gradient(180deg,#fff 10%,#b9d4ff 55%,#8a6fc4 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 40px rgba(79,195,255,.25)}
+.lede{max-width:46ch;margin:0 auto 40px;color:var(--muted);font-size:1.08rem}
+.panel{position:relative;text-align:left;padding:28px;border-radius:18px;background:var(--panel);
+  border:1px solid var(--line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 0 0 1px rgba(0,0,0,.4),0 30px 80px -20px rgba(0,0,0,.8),0 0 60px -10px rgba(79,195,255,.25),inset 0 1px 0 rgba(255,255,255,.08)}
+.panel::after{content:"";position:absolute;left:12%;right:12%;bottom:-1px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--ember),var(--blood),transparent);filter:blur(1px)}
+label{display:block;font-weight:600;margin-bottom:8px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+input[type=url],select{width:100%;font:inherit;color:var(--silver);background:rgba(5,5,14,.7);
+  border:1px solid var(--line);border-radius:12px;padding:14px 16px;outline:none;transition:border-color .2s,box-shadow .2s}
+input[type=url]{flex:1 1 100%}
+select{flex:1 1 160px;width:auto}
+input::placeholder{color:#6f7692}
+input:focus-visible,select:focus-visible{border-color:var(--moon);box-shadow:0 0 0 3px rgba(79,195,255,.25)}
+button{flex:2 1 200px;font:inherit;font-weight:600;color:#fff;cursor:pointer;border:0;border-radius:12px;padding:14px 22px;
+  background:linear-gradient(120deg,var(--blood),var(--ember));box-shadow:0 8px 30px -8px rgba(232,84,42,.7);
+  transition:transform .15s,box-shadow .2s,filter .2s}
+button:hover{filter:brightness(1.1);box-shadow:0 10px 36px -6px rgba(232,84,42,.9)}
+button:active{transform:translateY(1px)}
+button:focus-visible{outline:3px solid var(--moon);outline-offset:3px}
+button:disabled{opacity:.6;cursor:progress}
+.hint{margin:10px 0 18px;font-size:.88rem;color:var(--muted)}
+#status{min-height:1.5em;margin:18px 0 0;font-size:.95rem}
+#status.err{color:#ff8a8a}
+#status.ok{color:#7fe3b2}
+#status a{color:var(--moon);font-weight:600}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:36px 0 0;padding:0;list-style:none;text-align:left}
+.facts li{padding:16px 18px;border-radius:14px;border:1px solid var(--line);background:rgba(10,10,22,.45);color:var(--muted);font-size:.93rem}
+.facts strong{display:block;color:var(--silver);margin-bottom:2px}
+.facts li:nth-child(1){border-top:2px solid var(--moon)}
+.facts li:nth-child(2){border-top:2px solid var(--mist)}
+.facts li:nth-child(3){border-top:2px solid var(--ember)}
+footer{margin-top:44px;font-size:.82rem;color:#7d84a0}
+@media (prefers-reduced-motion:reduce){.fog{animation:none}button{transition:none}}
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="shaft"></div><div class="fog a"></div><div class="fog b"></div><div class="grain"></div>
+<main>
+  <h1>Turn a link into an MP3</h1>
+  <p class="lede">Paste the direct link to an audio or video file and download it as an MP3.</p>
+
+  <div class="panel">
+    <form id="f" novalidate>
+      <label for="url">File link</label>
+      <div class="row">
+        <input id="url" type="url" inputmode="url" autocomplete="off" placeholder="https://example.com/recording.mp4" required>
+        <select id="q" aria-label="Audio quality">
+          <option value="128">128 kbps</option>
+          <option value="192" selected>192 kbps</option>
+          <option value="320">320 kbps</option>
+        </select>
+        <button id="go" type="submit">Convert to MP3</button>
+      </div>
+      <p class="hint">Works with direct links ending in .mp4, .wav, .m4a, .ogg and similar.</p>
+    </form>
+    <p id="status" role="status" aria-live="polite"></p>
+  </div>
+
+  <ul class="facts">
+    <li><strong>Direct links only</strong>Use files you own or have permission to convert.</li>
+    <li><strong>Your choice of quality</strong>Pick 128, 192 or 320 kbps.</li>
+    <li><strong>Nothing stored</strong>Files are deleted right after conversion.</li>
+  </ul>
+  <footer>Only convert content you have the rights to use.</footer>
+</main>
+
+<script>
+// Set this to your backend's convert endpoint, e.g. "/convert" or "https://api.yoursite.com/convert"
+const ENDPOINT = "";
+
+const f = document.getElementById("f"), urlEl = document.getElementById("url"),
+      q = document.getElementById("q"), go = document.getElementById("go"),
+      st = document.getElementById("status");
+
+function say(msg, cls){ st.className = cls || ""; st.textContent = msg; }
+
+f.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const url = urlEl.value.trim();
+  if (!/^https?:\/\/.+\..+/i.test(url)) { say("Enter a full link that starts with http:// or https://", "err"); urlEl.focus(); return; }
+  if (!ENDPOINT) { say("The converter isn’t connected yet. Set ENDPOINT in the page script to your server’s convert URL.", "err"); return; }
+
+  go.disabled = true; say("Converting. This can take a few seconds…");
+  try {
+    const body = new FormData();
+    body.append("url", url); body.append("bitrate", q.value);
+    const res = await fetch(ENDPOINT, { method: "POST", body });
+    if (!res.ok) throw new Error(await res.text() || "Conversion failed");
+    const blob = await res.blob();
+    const href = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = href; a.download = "audio.mp3";
+    st.className = "ok"; st.textContent = "Done. ";
+    a.textContent = "Download MP3"; st.appendChild(a);
+    a.click();
+  } catch (err) {
+    say("Couldn’t convert that link: " + (err.message || "unknown error") + ". Check the link points straight to a media file.", "err");
+  } finally { go.disabled = false; }
+});
+</script>
+</body>
+</html>
